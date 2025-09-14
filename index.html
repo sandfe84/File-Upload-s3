@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bild hochladen</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f4f4f4;
+      text-align: center;
+    }
+    input[type="file"] {
+      margin: 20px 0;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #0078D4;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+    #status {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h2>📤 Bild hochladen</h2>
+  <input type="file" id="fileInput" accept="image/*">
+  <br>
+  <button onclick="uploadFile()">Hochladen</button>
+  <div id="status"></div>
+
+  <script>
+    async function uploadFile() {
+      const file = document.getElementById('fileInput').files[0];
+      if (!file) {
+        document.getElementById('status').innerText = "Bitte wähle eine Datei aus.";
+        return;
+      }
+
+      const response = await fetch('https://DEIN-BACKEND-URL/api/get-presigned-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: file.name })
+      });
+
+      const data = await response.json();
+      const uploadUrl = data.url;
+
+      const upload = await fetch(uploadUrl, {
+        method: 'PUT',
+        body: file,
+        headers: {
+          'Content-Type': file.type
+        }
+      });
+
+      if (upload.ok) {
+        document.getElementById('status').innerText = "✅ Upload erfolgreich!";
+      } else {
+        document.getElementById('status').innerText = "❌ Upload fehlgeschlagen.";
+      }
+    }
+  </script>
+</body>
+</html>
